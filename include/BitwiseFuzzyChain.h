@@ -36,6 +36,7 @@ public:
         for (size_t j = 1; j * BLOCK_SIZE < INTEGER_SIZE; j <<= 1) {
             overflowMask = overflowMask + (overflowMask << (j * BLOCK_SIZE));
         }
+        negOverflowMask = ~overflowMask;
     }
 
     void clear()
@@ -82,6 +83,7 @@ private:
     vector<uintmax_t> data;
     size_t n;
     uintmax_t overflowMask;
+    uintmax_t negOverflowMask;
 
     void internalPushBack(float value)
     {
