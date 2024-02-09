@@ -113,6 +113,16 @@ private:
         return 1.0 * ((data[index] >> shift) & BLOCK_MASK) / MAX_VALUE;
     }
 
+    uintmax_t internalCloneBits(uintmax_t value) const
+    {
+        uintmax_t res = value & overflowMask;
+        res = res | (res >> 1);
+        res = res | (res >> 2);
+        res = res | (res >> 4);
+
+        return res;
+    }
+
     uintmax_t internalSum() const
     {
         // TODO: as constant

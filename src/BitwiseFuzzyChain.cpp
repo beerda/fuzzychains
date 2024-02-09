@@ -27,11 +27,8 @@ void BitwiseFuzzyChain<TNorm::GOEDEL>::conjunctWith(const BitwiseFuzzyChain<TNor
     vector<uintmax_t> res = data;
 
     for (size_t i = 0; i < data.size() - 1; i++) {
-        res[i] = (a[i] - b[i]) & overflowMask;
-        res[i] = res[i] | (res[i] >> 1);
-        res[i] = res[i] | (res[i] >> 2);
-        res[i] = res[i] | (res[i] >> 4);
-        res[i] = (a[i] & res[i]) | (b[i] & ~(res[i]));
+        uintmax_t s = internalCloneBits(a[i] - b[i]);
+        res[i] = (a[i] & s) | (b[i] & ~s);
     }
 
     data = res;
@@ -66,12 +63,9 @@ void BitwiseFuzzyChain<TNorm::LUKASIEWICZ>::conjunctWith(const BitwiseFuzzyChain
     vector<uintmax_t> res = data;
     uintmax_t themask;
     for (size_t i = 0; i < data.size() - 1; i++) {
-        res[i] = (a[i] + b[i]);
-        themask = res[i] & overflowMask;
-        themask = themask | (themask >> 1);
-        themask = themask | (themask >> 2);
-        themask = themask | (themask >> 4);
-        res[i] = (res[i] | themask) & negOverflowMask;
+        uintmax_t sum = (a[i] + b[i]);
+        uintmax_t s = internalCloneBits(sum);
+        res[i] = (sum | s) & negOverflowMask;
     }
 
     data = res;
