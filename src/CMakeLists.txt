@@ -1,9 +1,11 @@
 set(HEADER_LIST
        "${fuzzychains_SOURCE_DIR}/include/common.h"
-       "${fuzzychains_SOURCE_DIR}/include/BitwiseFuzzyChain.h")
+       "${fuzzychains_SOURCE_DIR}/include/BitwiseFuzzyChain.h"
+       "${fuzzychains_SOURCE_DIR}/include/VectorFuzzyChain.h")
 
 set(CPP_LIST
-       "${fuzzychains_SOURCE_DIR}/src/BitwiseFuzzyChain.cpp")
+       "${fuzzychains_SOURCE_DIR}/src/BitwiseFuzzyChain.cpp"
+       "${fuzzychains_SOURCE_DIR}/src/VectorFuzzyChain.cpp")
 
 add_library(fuzzychains_lib STATIC "${HEADER_LIST}" "${CPP_LIST}")
 target_sources(fuzzychains_lib PUBLIC "${HEADER_LIST}")

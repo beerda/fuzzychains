@@ -13,6 +13,7 @@ add_executable(unittest
     unittest_BitwiseFuzzyChain_goedel.cpp
     unittest_BitwiseFuzzyChain_goguen.cpp
     unittest_BitwiseFuzzyChain_lukasiewicz.cpp
+    unittest_VectorFuzzyChain.cpp
 )
 target_link_libraries(unittest PRIVATE fuzzychains_lib GTest::gtest_main)
 

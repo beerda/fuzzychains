@@ -166,6 +166,4 @@ private:
 
         return result;
     }
-
-
 };
