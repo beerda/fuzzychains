@@ -61,9 +61,9 @@ void BitwiseFuzzyChain<TNorm::LUKASIEWICZ>::conjunctWith(const BitwiseFuzzyChain
     const uintmax_t* a = data.data();
     const uintmax_t* b = other.data.data();
     vector<uintmax_t> res = data;
-    uintmax_t themask;
+
     for (size_t i = 0; i < data.size() - 1; i++) {
-        uintmax_t sum = (a[i] + b[i]);
+        uintmax_t sum = a[i] + b[i];
         uintmax_t s = internalCloneBits(sum);
         res[i] = (sum | s) & negOverflowMask;
     }
