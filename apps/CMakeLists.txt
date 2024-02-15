@@ -11,6 +11,7 @@ target_link_libraries(fuzzychains PRIVATE fuzzychains_lib benchmark::benchmark)
 
 add_executable(unittest
     unittest_BitwiseFuzzyChain_goedel.cpp
+    unittest_BitwiseFuzzyChain_goguen.cpp
     unittest_BitwiseFuzzyChain_lukasiewicz.cpp
 )
 target_link_libraries(unittest PRIVATE fuzzychains_lib GTest::gtest_main)

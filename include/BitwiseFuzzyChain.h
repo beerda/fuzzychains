@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <cmath>
 #include <iostream>
 
 #include "common.h"
@@ -26,6 +27,9 @@ public:
     constexpr static uintmax_t DBL_BLOCK_MASK = (BLOCK_MASK << BLOCK_SIZE) + BLOCK_MASK;
 
     constexpr static uintmax_t STEP = ((1UL << (2 * BLOCK_SIZE)) - 1) / ((1UL << (BLOCK_SIZE - 1)) - 1) - 1;
+
+    static const float LOG_BASE;
+
 
     BitwiseFuzzyChain()
         : data(), n(0)
@@ -85,7 +89,7 @@ private:
     uintmax_t overflowMask;
     uintmax_t negOverflowMask;
 
-    void internalPushBack(float value)
+    void internalPushBack(uintmax_t value)
     {
         size_t index = n * BLOCK_SIZE / INTEGER_SIZE;
         size_t shift = n * BLOCK_SIZE % INTEGER_SIZE;
@@ -95,11 +99,11 @@ private:
             data.push_back(0);
         }
 
-        data[index] |= ((uintmax_t) (value * MAX_VALUE)) << shift;
+        data[index] |= value << shift;
         n++;
     }
 
-    float internalAt(size_t pos) const
+    uintmax_t internalAt(size_t pos) const
     {
         if (pos >= n) {
             throw std::out_of_range("BitwiseFuzzyChain::at");
@@ -110,7 +114,7 @@ private:
 
         //cout << endl << "index: " << index << ", shift: " << shift << ", data: " << data[index] << endl;
         //cout << "chunkmask: " << BLOCK_MASK << ", result: " << ((data[index] >> shift) & BLOCK_MASK) << endl;
-        return 1.0 * ((data[index] >> shift) & BLOCK_MASK) / MAX_VALUE;
+        return 1.0 * ((data[index] >> shift) & BLOCK_MASK);
     }
 
     uintmax_t internalCloneBits(uintmax_t value) const
