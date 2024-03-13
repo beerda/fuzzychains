@@ -1,16 +1,11 @@
 set(HEADER_LIST
-       "${fuzzychains_SOURCE_DIR}/include/common.h"
-       "${fuzzychains_SOURCE_DIR}/include/BitwiseFuzzyChain.h"
-       "${fuzzychains_SOURCE_DIR}/include/VectorFuzzyChain.h")
+    "${fuzzychains_SOURCE_DIR}/include/common.h"
+    "${fuzzychains_SOURCE_DIR}/include/BitwiseFuzzyChain.h"
+    "${fuzzychains_SOURCE_DIR}/include/VectorFuzzyChain.h")
 
-set(CPP_LIST
-       "${fuzzychains_SOURCE_DIR}/src/BitwiseFuzzyChain.cpp"
-       "${fuzzychains_SOURCE_DIR}/src/VectorFuzzyChain.cpp")
-
-add_library(fuzzychains_lib STATIC "${HEADER_LIST}" "${CPP_LIST}")
-target_sources(fuzzychains_lib PUBLIC "${HEADER_LIST}")
-target_sources(fuzzychains_lib PUBLIC "${CPP_LIST}")
-target_include_directories(fuzzychains_lib PUBLIC "${fuzzychains_SOURCE_DIR}/include/")
+add_library(fuzzychains_lib INTERFACE)
+target_sources(fuzzychains_lib INTERFACE "${HEADER_LIST}")
+target_include_directories(fuzzychains_lib INTERFACE "${fuzzychains_SOURCE_DIR}/include/")
 
 #source_group(
     #TREE "${PROJECT_SOURCE_DIR}/include"
