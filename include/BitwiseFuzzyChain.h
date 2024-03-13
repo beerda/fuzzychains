@@ -7,11 +7,11 @@
 #include "common.h"
 
 
-template <TNorm TNORM>
-class BitwiseFuzzyChain {
+template <unsigned int BLSIZE>
+class BitwiseFuzzyChainBase1 {
 public:
     // number of bits in a single block
-    constexpr static size_t BLOCK_SIZE = 8;
+    constexpr static size_t BLOCK_SIZE = BLSIZE;
 
     // number of bits in the whole integer
     constexpr static size_t INTEGER_SIZE = 8 * sizeof(uintmax_t);
@@ -31,7 +31,7 @@ public:
     static const float LOG_BASE;
 
 
-    BitwiseFuzzyChain()
+    BitwiseFuzzyChainBase1()
         : data(), n(0)
     {
         data.push_back(0); // +1 to make room for shifts in sum()
@@ -61,18 +61,12 @@ public:
     bool empty() const
     { return n == 0; }
 
-    void pushBack(float value);
-
     float at(size_t pos) const;
-
-    float sum() const;
-
-    void conjunctWith(const BitwiseFuzzyChain& other);
 
     vector<uintmax_t>& getMutableData()
     { return data; }
 
-    bool operator == (const BitwiseFuzzyChain& other) const
+    bool operator == (const BitwiseFuzzyChainBase1& other) const
     {
         if (n != other.n)
             return false;
@@ -80,10 +74,16 @@ public:
         return data == other.data;
     }
 
-    bool operator != (const BitwiseFuzzyChain& other) const
+    bool operator != (const BitwiseFuzzyChainBase1& other) const
     { return !(*this == other); }
 
-private:
+    /*
+    void pushBack(float value);
+    float sum() const;
+    void conjunctWith(const BitwiseFuzzyChainBase& other);
+    */
+
+protected:
     vector<uintmax_t> data;
     size_t n;
     uintmax_t overflowMask;
@@ -115,16 +115,6 @@ private:
         //cout << endl << "index: " << index << ", shift: " << shift << ", data: " << data[index] << endl;
         //cout << "chunkmask: " << BLOCK_MASK << ", result: " << ((data[index] >> shift) & BLOCK_MASK) << endl;
         return 1.0 * ((data[index] >> shift) & BLOCK_MASK);
-    }
-
-    uintmax_t internalCloneBits(uintmax_t value) const
-    {
-        uintmax_t res = value & overflowMask;
-        res = res | (res >> 1);
-        res = res | (res >> 2);
-        res = res | (res >> 4);
-
-        return res;
     }
 
     uintmax_t internalSum() const
@@ -165,5 +155,142 @@ private:
         }
 
         return result;
+    }
+};
+
+
+template <unsigned int BLSIZE>
+class BitwiseFuzzyChainBase2 : public BitwiseFuzzyChainBase1<BLSIZE> {
+};
+
+
+template <>
+class BitwiseFuzzyChainBase2<8> : public BitwiseFuzzyChainBase1<8> {
+protected:
+    uintmax_t internalCloneBits(uintmax_t value) const
+    {
+        uintmax_t res = value & overflowMask;
+        res = res | (res >> 1);
+        res = res | (res >> 2);
+        res = res | (res >> 4);
+
+        return res;
+    }
+};
+
+
+template <unsigned int BLSIZE, TNorm TNORM>
+class BitwiseFuzzyChain : public BitwiseFuzzyChainBase2<BLSIZE> {
+};
+
+
+template <unsigned int BLSIZE>
+class BitwiseFuzzyChain<BLSIZE, TNorm::GOEDEL> : public BitwiseFuzzyChainBase2<BLSIZE> {
+public:
+    void pushBack(float value)
+    { this->internalPushBack((uintmax_t) (value * this->MAX_VALUE)); }
+
+    float at(size_t pos) const
+    { return 1.0 * this->internalAt(pos) / this->MAX_VALUE; }
+
+    float sum() const
+    { return ((float) this->internalSum()) / ((float) this->MAX_VALUE); }
+
+    void conjunctWith(const BitwiseFuzzyChain<BLSIZE, TNorm::GOEDEL>& other)
+    {
+        if (this->n != other.n)
+            throw std::invalid_argument("BitwiseFuzzyChain<GOEDEL>::conjunctWith: incompatible sizes");
+
+        const uintmax_t* a = this->data.data();
+        const uintmax_t* b = other.data.data();
+        vector<uintmax_t> res = this->data;
+
+        for (size_t i = 0; i < this->data.size() - 1; i++) {
+            uintmax_t s = this->internalCloneBits(a[i] - b[i]);
+            res[i] = (a[i] & s) | (b[i] & ~s);
+        }
+
+        this->data = res;
+    }
+};
+
+
+template <unsigned int BLSIZE>
+class BitwiseFuzzyChain<BLSIZE, TNorm::LUKASIEWICZ> : public BitwiseFuzzyChainBase2<BLSIZE> {
+public:
+    void pushBack(float value)
+    { this->internalPushBack((uintmax_t) ((1.0 - value) * this->MAX_VALUE)); }
+
+    float at(size_t pos) const
+    { return 1.0 - 1.0 * this->internalAt(pos) / this->MAX_VALUE; }
+
+    float sum() const
+    { return this->size() - ((float) this->internalSum()) / ((float) this->MAX_VALUE); }
+
+    void conjunctWith(const BitwiseFuzzyChain<BLSIZE, TNorm::LUKASIEWICZ>& other)
+    {
+        if (this->n != other.n)
+            throw std::invalid_argument("BitwiseFuzzyChain<LUKASIEWICZ>::conjunctWith: incompatible sizes");
+
+        const uintmax_t* a = this->data.data();
+        const uintmax_t* b = other.data.data();
+        vector<uintmax_t> res = this->data;
+
+        for (size_t i = 0; i < this->data.size() - 1; i++) {
+            uintmax_t sum = a[i] + b[i];
+            uintmax_t s = this->internalCloneBits(sum);
+            res[i] = (sum | s) & this->negOverflowMask;
+        }
+
+        this->data = res;
+    }
+};
+
+
+template <unsigned int BLSIZE>
+class BitwiseFuzzyChain<BLSIZE, TNorm::GOGUEN> : public BitwiseFuzzyChainBase2<BLSIZE> {
+public:
+    const float LOG_BASE = pow(1.0 * this->MAX_VALUE, (-1.0) / (this->MAX_VALUE - 1));
+
+    void pushBack(float value)
+    {
+        static float reciprocal = 1.0 / this->MAX_VALUE;
+        static float logLogBase = log(LOG_BASE);
+
+        this->internalPushBack((value <= reciprocal) ? this->MAX_VALUE : round(log(value) / logLogBase));
+    }
+
+    float at(size_t pos) const
+    {
+        uintmax_t val = this->internalAt(pos);
+
+        return (val >= this->MAX_VALUE) ? 0.0 : pow(LOG_BASE, val);
+    }
+
+    float sum() const
+    {
+        float result = 0.0;
+        for (size_t i = 0; i < this->size(); ++i)
+            result += at(i);
+
+        return result;
+    }
+
+    void conjunctWith(const BitwiseFuzzyChain<BLSIZE, TNorm::GOGUEN>& other)
+    {
+        if (this->n != other.n)
+            throw std::invalid_argument("BitwiseFuzzyChain<GOGUEN>::conjunctWith: incompatible sizes");
+
+        const uintmax_t* a = this->data.data();
+        const uintmax_t* b = other.data.data();
+        vector<uintmax_t> res = this->data;
+        uintmax_t themask;
+        for (size_t i = 0; i < this->data.size() - 1; i++) {
+            uintmax_t sum = (a[i] + b[i]);
+            uintmax_t s = this->internalCloneBits(sum);
+            res[i] = (sum | s) & this->negOverflowMask;
+        }
+
+        this->data = res;
     }
 };

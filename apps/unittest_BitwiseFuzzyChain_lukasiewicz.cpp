@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 #include "BitwiseFuzzyChain.h"
 
-#define EXPECTED_DATA_SIZE(x) ((x-1) * BitwiseFuzzyChain<LUKASIEWICZ>::BLOCK_SIZE / BitwiseFuzzyChain<LUKASIEWICZ>::INTEGER_SIZE + 2)
+#define EXPECTED_DATA_SIZE(x) ((x-1) * BitwiseFuzzyChain<8, LUKASIEWICZ>::BLOCK_SIZE / BitwiseFuzzyChain<8, LUKASIEWICZ>::INTEGER_SIZE + 2)
 #define EQUAL(a, b) (fabs((a) - (b)) < 1e-6)
 
 
 TEST(LukasiewiczBitwiseFuzzyChainTest, PushBackAndSum) {
-    BitwiseFuzzyChain<LUKASIEWICZ> b;
+    BitwiseFuzzyChain<8, LUKASIEWICZ> b;
 
     EXPECT_TRUE(b.empty());
     EXPECT_TRUE(b.size() == 0);
@@ -115,8 +115,8 @@ TEST(LukasiewiczBitwiseFuzzyChainTest, PushBackAndSum) {
 }
 
 TEST(LukasiewiczBitwiseFuzzyChainTest, Reserve) {
-    size_t inBlock = BitwiseFuzzyChain<LUKASIEWICZ>::INTEGER_SIZE / BitwiseFuzzyChain<LUKASIEWICZ>::BLOCK_SIZE;
-    BitwiseFuzzyChain<LUKASIEWICZ> b;
+    size_t inBlock = BitwiseFuzzyChain<8, LUKASIEWICZ>::INTEGER_SIZE / BitwiseFuzzyChain<8, LUKASIEWICZ>::BLOCK_SIZE;
+    BitwiseFuzzyChain<8, LUKASIEWICZ> b;
 
     EXPECT_TRUE(b.size() == 0);
     EXPECT_TRUE(b.getMutableData().size() == 1);
@@ -139,8 +139,8 @@ TEST(LukasiewiczBitwiseFuzzyChainTest, Reserve) {
 }
 
 TEST(LukasiewiczBitwiseFuzzyChainTest, ConjunctWith) {
-    BitwiseFuzzyChain<LUKASIEWICZ> a;
-    BitwiseFuzzyChain<LUKASIEWICZ> b;
+    BitwiseFuzzyChain<8, LUKASIEWICZ> a;
+    BitwiseFuzzyChain<8, LUKASIEWICZ> b;
 
     for (int j = 0; j < 1; j++) {
         for (double i = 0.0; i <= 1.0; i += 0.2)

@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 #include "BitwiseFuzzyChain.h"
 
-#define EXPECTED_DATA_SIZE(x) ((x-1) * BitwiseFuzzyChain<GOGUEN>::BLOCK_SIZE / BitwiseFuzzyChain<GOGUEN>::INTEGER_SIZE + 2)
+#define EXPECTED_DATA_SIZE(x) ((x-1) * BitwiseFuzzyChain<8, GOGUEN>::BLOCK_SIZE / BitwiseFuzzyChain<8, GOGUEN>::INTEGER_SIZE + 2)
 #define EQUAL(a, b) (fabs((a) - (b)) < 1e-6)
 
 
 TEST(GoguenBitwiseFuzzyChainTest, PushBackAndSum) {
-    BitwiseFuzzyChain<GOGUEN> b;
+    BitwiseFuzzyChain<8, GOGUEN> b;
 
     EXPECT_TRUE(b.empty());
     EXPECT_TRUE(b.size() == 0);
@@ -115,8 +115,8 @@ TEST(GoguenBitwiseFuzzyChainTest, PushBackAndSum) {
 }
 
 TEST(GoguenBitwiseFuzzyChainTest, Reserve) {
-    size_t inBlock = BitwiseFuzzyChain<GOGUEN>::INTEGER_SIZE / BitwiseFuzzyChain<GOGUEN>::BLOCK_SIZE;
-    BitwiseFuzzyChain<GOGUEN> b;
+    size_t inBlock = BitwiseFuzzyChain<8, GOGUEN>::INTEGER_SIZE / BitwiseFuzzyChain<8, GOGUEN>::BLOCK_SIZE;
+    BitwiseFuzzyChain<8, GOGUEN> b;
 
     EXPECT_TRUE(b.size() == 0);
     EXPECT_TRUE(b.getMutableData().size() == 1);
@@ -139,8 +139,8 @@ TEST(GoguenBitwiseFuzzyChainTest, Reserve) {
 }
 
 TEST(GoguenBitwiseFuzzyChainTest, ConjunctWith) {
-    BitwiseFuzzyChain<GOGUEN> a;
-    BitwiseFuzzyChain<GOGUEN> b;
+    BitwiseFuzzyChain<8, GOGUEN> a;
+    BitwiseFuzzyChain<8, GOGUEN> b;
 
     for (int j = 0; j < 1; j++) {
         for (double i = 0.0; i <= 1.0; i += 0.2)

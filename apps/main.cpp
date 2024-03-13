@@ -4,11 +4,11 @@
 
 #define LENGTH 1 << 20
 
-template<TNorm TNORM>
+template<unsigned int BLSIZE, TNorm TNORM>
 class BitwiseFuzzyChainFixture : public benchmark::Fixture {
 public:
-    BitwiseFuzzyChain<TNORM> ch1;
-    BitwiseFuzzyChain<TNORM> ch2;
+    BitwiseFuzzyChain<BLSIZE, TNORM> ch1;
+    BitwiseFuzzyChain<BLSIZE, TNORM> ch2;
     float result = 0.0;
 
     void SetUp(::benchmark::State& state)
@@ -45,7 +45,7 @@ public:
 };
 
 
-BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, GoedelConjunct, TNorm::GOEDEL)(benchmark::State& st) {
+BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, GoedelConjunct, 8, TNorm::GOEDEL)(benchmark::State& st) {
     for (auto _ : st) {
         ch1.conjunctWith(ch2);
     }
@@ -57,7 +57,7 @@ BENCHMARK_TEMPLATE_F(VectorFuzzyChainFixture, GoedelConjunct, TNorm::GOEDEL)(ben
     }
 }
 
-BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, GoedelSum, TNorm::GOEDEL)(benchmark::State& st) {
+BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, GoedelSum, 8, TNorm::GOEDEL)(benchmark::State& st) {
     for (auto _ : st) {
         result += ch1.sum();
     }
@@ -69,7 +69,7 @@ BENCHMARK_TEMPLATE_F(VectorFuzzyChainFixture, GoedelSum, TNorm::GOEDEL)(benchmar
     }
 }
 
-BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, GoguenConjunct, TNorm::GOGUEN)(benchmark::State& st) {
+BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, GoguenConjunct, 8, TNorm::GOGUEN)(benchmark::State& st) {
     for (auto _ : st) {
         ch1.conjunctWith(ch2);
     }
@@ -81,7 +81,7 @@ BENCHMARK_TEMPLATE_F(VectorFuzzyChainFixture, GoguenConjunct, TNorm::GOGUEN)(ben
     }
 }
 
-BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, GoguenSum, TNorm::GOGUEN)(benchmark::State& st) {
+BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, GoguenSum, 8, TNorm::GOGUEN)(benchmark::State& st) {
     for (auto _ : st) {
         result += ch1.sum();
     }
@@ -93,7 +93,7 @@ BENCHMARK_TEMPLATE_F(VectorFuzzyChainFixture, GoguenSum, TNorm::GOGUEN)(benchmar
     }
 }
 
-BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, LukasiewiczConjunct, TNorm::LUKASIEWICZ)(benchmark::State& st) {
+BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, LukasiewiczConjunct, 8, TNorm::LUKASIEWICZ)(benchmark::State& st) {
     for (auto _ : st) {
         ch1.conjunctWith(ch2);
     }
@@ -105,7 +105,7 @@ BENCHMARK_TEMPLATE_F(VectorFuzzyChainFixture, LukasiewiczConjunct, TNorm::LUKASI
     }
 }
 
-BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, LukasiewiczSum, TNorm::LUKASIEWICZ)(benchmark::State& st) {
+BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, LukasiewiczSum, 8, TNorm::LUKASIEWICZ)(benchmark::State& st) {
     for (auto _ : st) {
         result += ch1.sum();
     }
