@@ -8,9 +8,9 @@
 
 
 template <TNorm TNORM>
-class VectorFuzzyChain {
+class VectorFuzzyChainBase {
 public:
-    VectorFuzzyChain()
+    VectorFuzzyChainBase()
         : data()
     { }
 
@@ -42,14 +42,66 @@ public:
         return res;
     }
 
-    void conjunctWith(const VectorFuzzyChain& other);
+    void conjunctWith(const VectorFuzzyChainBase& other);
 
-    bool operator == (const VectorFuzzyChain& other) const
+    bool operator == (const VectorFuzzyChainBase& other) const
     { return data == other.data; }
 
-    bool operator != (const VectorFuzzyChain& other) const
+    bool operator != (const VectorFuzzyChainBase& other) const
     { return !(*this == other); }
 
-private:
+protected:
     vector<float> data;
+};
+
+
+template <TNorm TNORM>
+class VectorFuzzyChain : public VectorFuzzyChainBase<TNORM> {
+};
+
+
+template <>
+class VectorFuzzyChain<TNorm::GOEDEL> : public VectorFuzzyChainBase<TNorm::GOEDEL> {
+public:
+    void conjunctWith(const VectorFuzzyChain<TNorm::GOEDEL>& other)
+    {
+        if (this->size() != other.size())
+            throw std::invalid_argument("VectorFuzzyChain<GOEDEL>::conjunctWith: incompatible sizes");
+
+        for (size_t i = 0; i < this->data.size(); i++) {
+            this->data[i] = min(this->data[i], other.data[i]);
+        }
+    }
+};
+
+
+template <>
+class VectorFuzzyChain<TNorm::LUKASIEWICZ> : public VectorFuzzyChainBase<TNorm::LUKASIEWICZ> {
+public:
+    void conjunctWith(const VectorFuzzyChain<TNorm::LUKASIEWICZ>& other)
+    {
+        if (this->size() != other.size())
+            throw std::invalid_argument("VectorFuzzyChain<LUKASIEWICZ>::conjunctWith: incompatible sizes");
+
+        for (size_t i = 0; i < this->data.size(); i++) {
+            this->data[i] += other.data[i] - 1.0;
+            if (this->data[i] < 0.0)
+                this->data[i] = 0;
+        }
+    }
+};
+
+
+template <>
+class VectorFuzzyChain<TNorm::GOGUEN> : public VectorFuzzyChainBase<TNorm::GOGUEN> {
+public:
+    void conjunctWith(const VectorFuzzyChain<TNorm::GOGUEN>& other)
+    {
+        if (this->size() != other.size())
+            throw std::invalid_argument("VectorFuzzyChain<GOGUEN>::conjunctWith: incompatible sizes");
+
+        for (size_t i = 0; i < this->data.size(); i++) {
+            this->data[i] = this->data[i] * other.data[i];
+        }
+    }
 };
