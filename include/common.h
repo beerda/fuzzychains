@@ -1,6 +1,10 @@
 #pragma once
 
 #include <cmath>
+#include <iostream>
+#include <vector>
+
+#include "AlignedAllocator.h"
 
 using namespace std;
 
@@ -13,3 +17,6 @@ enum TNorm {
     GOGUEN,
     LUKASIEWICZ
 };
+
+template <typename TYPE>
+using AlignedVector = vector<TYPE, AlignedAllocator<TYPE, 512>>;

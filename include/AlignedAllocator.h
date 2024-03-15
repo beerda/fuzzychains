@@ -1,13 +1,6 @@
 #pragma once
 
-#ifdef _WIN32
-#include <malloc.h>
-#endif
-#include <cstdint>
-#include <vector>
 #include <iostream>
-
-#include "common.h"
 
 /**
  * Allocator for aligned data.
@@ -149,7 +142,3 @@ class AlignedAllocator {
     private:
         AlignedAllocator& operator=(const AlignedAllocator&);
 };
-
-
-template <typename TYPE>
-using AlignedVector = vector<TYPE, AlignedAllocator<TYPE, 512>>;
