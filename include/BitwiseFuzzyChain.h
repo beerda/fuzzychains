@@ -5,28 +5,34 @@
 #include <iostream>
 
 #include "common.h"
+#include "AlignedAllocator.h"
+
+
+typedef uintmax_t BASE_TYPE;
+typedef vector<BASE_TYPE, AlignedAllocator<BASE_TYPE, 128>> AlignedVector;
 
 
 template <unsigned int BLSIZE>
 class BitwiseFuzzyChainBase1 {
 public:
+
     // number of bits in a single block
     constexpr static size_t BLOCK_SIZE = BLSIZE;
 
     // number of bits in the whole integer
-    constexpr static size_t INTEGER_SIZE = 8 * sizeof(uintmax_t);
+    constexpr static size_t INTEGER_SIZE = 8 * sizeof(BASE_TYPE);
 
     // maximum unsigned number to be stored in a value bits of a block
     // (the overflow bit (i.e. the hightest bit) must remain empty
-    constexpr static uintmax_t MAX_VALUE = (((uintmax_t) 1) << (BLOCK_SIZE - 1)) - 1;
+    constexpr static BASE_TYPE MAX_VALUE = (((BASE_TYPE) 1) << (BLOCK_SIZE - 1)) - 1;
 
     // bit mask of the first block of bits within the integer
-    constexpr static uintmax_t BLOCK_MASK = (((uintmax_t) 1) << BLOCK_SIZE) - 1;
+    constexpr static BASE_TYPE BLOCK_MASK = (((BASE_TYPE) 1) << BLOCK_SIZE) - 1;
 
     // bit mask of first two blocks of bits within the integer
-    constexpr static uintmax_t DBL_BLOCK_MASK = (BLOCK_MASK << BLOCK_SIZE) + BLOCK_MASK;
+    constexpr static BASE_TYPE DBL_BLOCK_MASK = (BLOCK_MASK << BLOCK_SIZE) + BLOCK_MASK;
 
-    constexpr static uintmax_t STEP = ((1UL << (2 * BLOCK_SIZE)) - 1) / ((1UL << (BLOCK_SIZE - 1)) - 1) - 1;
+    constexpr static BASE_TYPE STEP = ((1UL << (2 * BLOCK_SIZE)) - 1) / ((1UL << (BLOCK_SIZE - 1)) - 1) - 1;
 
     static const float LOG_BASE;
 
@@ -63,7 +69,7 @@ public:
 
     float at(size_t pos) const;
 
-    vector<uintmax_t>& getMutableData()
+    AlignedVector& getMutableData()
     { return data; }
 
     bool operator == (const BitwiseFuzzyChainBase1& other) const
@@ -77,19 +83,13 @@ public:
     bool operator != (const BitwiseFuzzyChainBase1& other) const
     { return !(*this == other); }
 
-    /*
-    void pushBack(float value);
-    float sum() const;
-    void conjunctWith(const BitwiseFuzzyChainBase& other);
-    */
-
 protected:
-    vector<uintmax_t> data;
+    AlignedVector data;
     size_t n;
-    uintmax_t overflowMask;
-    uintmax_t negOverflowMask;
+    BASE_TYPE overflowMask;
+    BASE_TYPE negOverflowMask;
 
-    void internalPushBack(uintmax_t value)
+    void internalPushBack(BASE_TYPE value)
     {
         size_t index = n * BLOCK_SIZE / INTEGER_SIZE;
         size_t shift = n * BLOCK_SIZE % INTEGER_SIZE;
@@ -103,7 +103,7 @@ protected:
         n++;
     }
 
-    uintmax_t internalAt(size_t pos) const
+    BASE_TYPE internalAt(size_t pos) const
     {
         if (pos >= n) {
             throw std::out_of_range("BitwiseFuzzyChain::at");
@@ -117,19 +117,19 @@ protected:
         return 1.0 * ((data[index] >> shift) & BLOCK_MASK);
     }
 
-    uintmax_t internalSum() const
+    BASE_TYPE internalSum() const
     {
         // TODO: as constant
-        uintmax_t mask = BLOCK_MASK;
+        BASE_TYPE mask = BLOCK_MASK;
         for (size_t shift = 1; shift < INTEGER_SIZE / 2; shift += BLOCK_SIZE) {
             mask = (mask << (2 * BLOCK_SIZE)) + BLOCK_MASK;
         }
 
-        uintmax_t result = 0;
-        uintmax_t tempOdd = 0;
-        uintmax_t tempEven = 0;
-        const uintmax_t* oddChain = data.data();
-        const uintmax_t* evenChain = (uintmax_t*) (((uint8_t*) data.data()) + (BLOCK_SIZE / 8));
+        BASE_TYPE result = 0;
+        BASE_TYPE tempOdd = 0;
+        BASE_TYPE tempEven = 0;
+        const BASE_TYPE* oddChain = data.data();
+        const BASE_TYPE* evenChain = (BASE_TYPE*) (((uint8_t*) data.data()) + (BLOCK_SIZE / 8));
 
         size_t index = 0;
         while (index < data.size() - 1) {
@@ -165,11 +165,25 @@ class BitwiseFuzzyChainBase2 : public BitwiseFuzzyChainBase1<BLSIZE> {
 
 
 template <>
+class BitwiseFuzzyChainBase2<4> : public BitwiseFuzzyChainBase1<4> {
+protected:
+    BASE_TYPE internalCloneBits(BASE_TYPE value) const
+    {
+        BASE_TYPE res = value & overflowMask;
+        res = res | (res >> 1);
+        res = res | (res >> 2);
+
+        return res;
+    }
+};
+
+
+template <>
 class BitwiseFuzzyChainBase2<8> : public BitwiseFuzzyChainBase1<8> {
 protected:
-    uintmax_t internalCloneBits(uintmax_t value) const
+    BASE_TYPE internalCloneBits(BASE_TYPE value) const
     {
-        uintmax_t res = value & overflowMask;
+        BASE_TYPE res = value & overflowMask;
         res = res | (res >> 1);
         res = res | (res >> 2);
         res = res | (res >> 4);
@@ -188,7 +202,7 @@ template <unsigned int BLSIZE>
 class BitwiseFuzzyChain<BLSIZE, TNorm::GOEDEL> : public BitwiseFuzzyChainBase2<BLSIZE> {
 public:
     void pushBack(float value)
-    { this->internalPushBack((uintmax_t) (value * this->MAX_VALUE)); }
+    { this->internalPushBack((BASE_TYPE) (value * this->MAX_VALUE)); }
 
     float at(size_t pos) const
     { return 1.0 * this->internalAt(pos) / this->MAX_VALUE; }
@@ -201,12 +215,12 @@ public:
         if (this->n != other.n)
             throw std::invalid_argument("BitwiseFuzzyChain<GOEDEL>::conjunctWith: incompatible sizes");
 
-        const uintmax_t* a = this->data.data();
-        const uintmax_t* b = other.data.data();
-        vector<uintmax_t> res = this->data;
+        const BASE_TYPE* a = this->data.data();
+        const BASE_TYPE* b = other.data.data();
+        AlignedVector res = this->data;
 
         for (size_t i = 0; i < this->data.size() - 1; i++) {
-            uintmax_t s = this->internalCloneBits(a[i] - b[i]);
+            BASE_TYPE s = this->internalCloneBits(a[i] - b[i]);
             res[i] = (a[i] & s) | (b[i] & ~s);
         }
 
@@ -219,7 +233,7 @@ template <unsigned int BLSIZE>
 class BitwiseFuzzyChain<BLSIZE, TNorm::LUKASIEWICZ> : public BitwiseFuzzyChainBase2<BLSIZE> {
 public:
     void pushBack(float value)
-    { this->internalPushBack((uintmax_t) ((1.0 - value) * this->MAX_VALUE)); }
+    { this->internalPushBack((BASE_TYPE) ((1.0 - value) * this->MAX_VALUE)); }
 
     float at(size_t pos) const
     { return 1.0 - 1.0 * this->internalAt(pos) / this->MAX_VALUE; }
@@ -229,17 +243,32 @@ public:
 
     void conjunctWith(const BitwiseFuzzyChain<BLSIZE, TNorm::LUKASIEWICZ>& other)
     {
+        /*
         if (this->n != other.n)
             throw std::invalid_argument("BitwiseFuzzyChain<LUKASIEWICZ>::conjunctWith: incompatible sizes");
 
-        const uintmax_t* a = this->data.data();
-        const uintmax_t* b = other.data.data();
-        vector<uintmax_t> res = this->data;
+        const BASE_TYPE* a = this->data.data();
+        const BASE_TYPE* b = other.data.data();
+        AlignedVector res = this->data;
 
         for (size_t i = 0; i < this->data.size() - 1; i++) {
-            uintmax_t sum = a[i] + b[i];
-            uintmax_t s = this->internalCloneBits(sum);
+            BASE_TYPE sum = a[i] + b[i];
+            BASE_TYPE s = this->internalCloneBits(sum);
             res[i] = (sum | s) & this->negOverflowMask;
+        }
+
+        this->data = res;
+        */
+        if (this->n != other.n)
+            throw std::invalid_argument("BitwiseFuzzyChain<GOEDEL>::conjunctWith: incompatible sizes");
+
+        const BASE_TYPE* a = this->data.data();
+        const BASE_TYPE* b = other.data.data();
+        AlignedVector res = this->data;
+
+        for (size_t i = 0; i < this->data.size() - 1; i++) {
+            BASE_TYPE s = this->internalCloneBits(a[i] - b[i]);
+            res[i] = (a[i] & s) | (b[i] & ~s);
         }
 
         this->data = res;
@@ -262,7 +291,7 @@ public:
 
     float at(size_t pos) const
     {
-        uintmax_t val = this->internalAt(pos);
+        BASE_TYPE val = this->internalAt(pos);
 
         return (val >= this->MAX_VALUE) ? 0.0 : pow(LOG_BASE, val);
     }
@@ -281,13 +310,13 @@ public:
         if (this->n != other.n)
             throw std::invalid_argument("BitwiseFuzzyChain<GOGUEN>::conjunctWith: incompatible sizes");
 
-        const uintmax_t* a = this->data.data();
-        const uintmax_t* b = other.data.data();
-        vector<uintmax_t> res = this->data;
-        uintmax_t themask;
+        const BASE_TYPE* a = this->data.data();
+        const BASE_TYPE* b = other.data.data();
+        AlignedVector res = this->data;
+        BASE_TYPE themask;
         for (size_t i = 0; i < this->data.size() - 1; i++) {
-            uintmax_t sum = (a[i] + b[i]);
-            uintmax_t s = this->internalCloneBits(sum);
+            BASE_TYPE sum = (a[i] + b[i]);
+            BASE_TYPE s = this->internalCloneBits(sum);
             res[i] = (sum | s) & this->negOverflowMask;
         }
 

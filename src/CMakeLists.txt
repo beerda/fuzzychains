@@ -1,5 +1,6 @@
 set(HEADER_LIST
     "${fuzzychains_SOURCE_DIR}/include/common.h"
+    "${fuzzychains_SOURCE_DIR}/include/AlignedAllocator.h"
     "${fuzzychains_SOURCE_DIR}/include/BitwiseFuzzyChain.h"
     "${fuzzychains_SOURCE_DIR}/include/VectorFuzzyChain.h")
 
