@@ -2,36 +2,8 @@
 #include "BitwiseFuzzyChain.h"
 #include "VectorFuzzyChain.h"
 
-#define LENGTH 1 << 24
+#define LENGTH 16777216  // 2^24
 //#define LENGTH 65536
-
-#define BENCHMARK_BITWISE_CONJUNCTION(name, blsize, tnorm) BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, name, blsize, tnorm)(benchmark::State& st) \
-    {                                 \
-        for (auto _ : st) {           \
-            ch1.conjunctWith(ch2);    \
-        }                             \
-    }
-
-#define BENCHMARK_VECTOR_CONJUNCTION(name, tnorm) BENCHMARK_TEMPLATE_F(VectorFuzzyChainFixture, name, tnorm)(benchmark::State& st) \
-    {                                 \
-        for (auto _ : st) {           \
-            ch1.conjunctWith(ch2);    \
-        }                             \
-    }
-
-#define BENCHMARK_BITWISE_SUM(name, blsize, tnorm) BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, name, blsize, tnorm)(benchmark::State& st) \
-    {                                 \
-        for (auto _ : st) {           \
-            result += ch1.sum();      \
-        }                             \
-    }
-
-#define BENCHMARK_VECTOR_SUM(name, tnorm) BENCHMARK_TEMPLATE_F(VectorFuzzyChainFixture, name, tnorm)(benchmark::State& st) \
-    {                                 \
-        for (auto _ : st) {           \
-            result += ch1.sum();      \
-        }                             \
-    }
 
 template<unsigned int BLSIZE, TNorm TNORM>
 class BitwiseFuzzyChainFixture : public benchmark::Fixture {
@@ -47,11 +19,6 @@ public:
             ch1.pushBack(1.0 * rand() / RAND_MAX);
             ch2.pushBack(1.0 * rand() / RAND_MAX);
         }
-        /*
-        std::cout << "real size: " << ch1.getMutableData().size()
-            << " data size: " << ch1.size()
-            << " block size: " << ch1.BLOCK_SIZE << ":" << BLSIZE << std::endl;
-            */
     }
 
     void TearDown(::benchmark::State& state)
@@ -81,6 +48,32 @@ public:
     { }
 };
 
+#define BENCHMARK_BITWISE_CONJUNCTION(name, blsize, tnorm) BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, name, blsize, tnorm)(benchmark::State& st) \
+    {                                 \
+        for (auto _ : st) {           \
+            ch1.conjunctWith(ch2);    \
+        }                             \
+    }
+
+#define BENCHMARK_VECTOR_CONJUNCTION(name, tnorm) BENCHMARK_TEMPLATE_F(VectorFuzzyChainFixture, name, tnorm)(benchmark::State& st) \
+    {                                 \
+        for (auto _ : st) {           \
+            ch1.conjunctWith(ch2);    \
+        }                             \
+    }
+
+#define BENCHMARK_BITWISE_SUM(name, blsize, tnorm) BENCHMARK_TEMPLATE_F(BitwiseFuzzyChainFixture, name, blsize, tnorm)(benchmark::State& st) \
+    {                                 \
+        for (auto _ : st) {           \
+            result += ch1.sum();      \
+        }                             \
+    }
+
+#define BENCHMARK_VECTOR_SUM(name, tnorm) BENCHMARK_TEMPLATE_F(VectorFuzzyChainFixture, name, tnorm)(benchmark::State& st) \
+    {                                 \
+        for (auto _ : st) {           \
+            result += ch1.sum();      \
+        }                             \
 
 BENCHMARK_BITWISE_CONJUNCTION(GoguenConjunct4, 4, TNorm::GOGUEN)
 BENCHMARK_BITWISE_CONJUNCTION(LukasiewiczConjunct4, 4, TNorm::LUKASIEWICZ)
