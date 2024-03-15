@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "common.h"
+#include "AlignedAllocator.h"
 
 
 template <TNorm TNORM>
@@ -51,7 +52,7 @@ public:
     { return !(*this == other); }
 
 protected:
-    vector<float> data;
+    AlignedVector<float> data;
 };
 
 

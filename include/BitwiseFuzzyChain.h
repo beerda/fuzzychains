@@ -9,7 +9,7 @@
 
 
 typedef uintmax_t BASE_TYPE;
-typedef vector<BASE_TYPE, AlignedAllocator<BASE_TYPE, 128>> AlignedVector;
+typedef AlignedVector<BASE_TYPE> BitwiseVector;
 
 
 template <unsigned int BLSIZE>
@@ -69,7 +69,7 @@ public:
 
     float at(size_t pos) const;
 
-    AlignedVector& getMutableData()
+    BitwiseVector& getMutableData()
     { return data; }
 
     bool operator == (const BitwiseFuzzyChainBase1& other) const
@@ -84,7 +84,7 @@ public:
     { return !(*this == other); }
 
 protected:
-    AlignedVector data;
+    BitwiseVector data;
     size_t n;
     BASE_TYPE overflowMask;
     BASE_TYPE negOverflowMask;
@@ -167,7 +167,7 @@ class BitwiseFuzzyChainBase2 : public BitwiseFuzzyChainBase1<BLSIZE> {
 template <>
 class BitwiseFuzzyChainBase2<4> : public BitwiseFuzzyChainBase1<4> {
 protected:
-    BASE_TYPE internalCloneBits(BASE_TYPE value) const
+    inline BASE_TYPE internalCloneBits(BASE_TYPE value) const
     {
         BASE_TYPE res = value & overflowMask;
         res = res | (res >> 1);
@@ -181,7 +181,7 @@ protected:
 template <>
 class BitwiseFuzzyChainBase2<8> : public BitwiseFuzzyChainBase1<8> {
 protected:
-    BASE_TYPE internalCloneBits(BASE_TYPE value) const
+    inline BASE_TYPE internalCloneBits(BASE_TYPE value) const
     {
         BASE_TYPE res = value & overflowMask;
         res = res | (res >> 1);
@@ -217,7 +217,7 @@ public:
 
         const BASE_TYPE* a = this->data.data();
         const BASE_TYPE* b = other.data.data();
-        AlignedVector res = this->data;
+        BitwiseVector res = this->data;
 
         for (size_t i = 0; i < this->data.size() - 1; i++) {
             BASE_TYPE s = this->internalCloneBits(a[i] - b[i]);
@@ -249,7 +249,7 @@ public:
 
         const BASE_TYPE* a = this->data.data();
         const BASE_TYPE* b = other.data.data();
-        AlignedVector res = this->data;
+        BitwiseVector res = this->data;
 
         for (size_t i = 0; i < this->data.size() - 1; i++) {
             BASE_TYPE sum = a[i] + b[i];
@@ -264,7 +264,7 @@ public:
 
         const BASE_TYPE* a = this->data.data();
         const BASE_TYPE* b = other.data.data();
-        AlignedVector res = this->data;
+        BitwiseVector res = this->data;
 
         for (size_t i = 0; i < this->data.size() - 1; i++) {
             BASE_TYPE s = this->internalCloneBits(a[i] - b[i]);
@@ -312,7 +312,7 @@ public:
 
         const BASE_TYPE* a = this->data.data();
         const BASE_TYPE* b = other.data.data();
-        AlignedVector res = this->data;
+        BitwiseVector res = this->data;
         BASE_TYPE themask;
         for (size_t i = 0; i < this->data.size() - 1; i++) {
             BASE_TYPE sum = (a[i] + b[i]);
