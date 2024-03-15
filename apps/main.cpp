@@ -74,6 +74,7 @@ public:
         for (auto _ : st) {           \
             result += ch1.sum();      \
         }                             \
+    }
 
 BENCHMARK_BITWISE_CONJUNCTION(GoguenConjunct4, 4, TNorm::GOGUEN)
 BENCHMARK_BITWISE_CONJUNCTION(LukasiewiczConjunct4, 4, TNorm::LUKASIEWICZ)
