@@ -11,8 +11,6 @@
 template <typename T, std::size_t Alignment>
 class AlignedAllocator {
     public:
-
-        // The following will be the same for virtually all allocators.
         typedef T * pointer;
         typedef const T * const_pointer;
         typedef T& reference;
@@ -22,14 +20,10 @@ class AlignedAllocator {
         typedef ptrdiff_t difference_type;
 
         T * address(T& r) const
-        {
-            return &r;
-        }
+        { return &r; }
 
         const T * address(const T& s) const
-        {
-            return &s;
-        }
+        { return &s; }
 
         std::size_t max_size() const
         {
@@ -44,12 +38,10 @@ class AlignedAllocator {
         struct rebind
         {
             typedef AlignedAllocator<U, Alignment> other;
-        } ;
+        };
 
         bool operator!=(const AlignedAllocator& other) const
-        {
-            return !(*this == other);
-        }
+        { return !(*this == other); }
 
         void construct(T * const p, const T& t) const
         {
@@ -59,17 +51,13 @@ class AlignedAllocator {
         }
 
         void destroy(T * const p) const
-        {
-            p->~T();
-        }
+        { p->~T(); }
 
         // Returns true if and only if storage allocated from *this
         // can be deallocated from other, and vice versa.
         // Always returns true for stateless allocators.
         bool operator==(const AlignedAllocator& other) const
-        {
-            return true;
-        }
+        { return true; }
 
 
         // Default constructor, copy constructor, rebinding constructor, and destructor.
@@ -99,18 +87,15 @@ class AlignedAllocator {
             // All allocators should contain an integer overflow check.
             // The Standardization Committee recommends that std::length_error
             // be thrown in the case of integer overflow.
-            if (n > max_size())
-            {
+            if (n > max_size()) {
                 throw std::length_error("AlignedAllocator<T>::allocate() - Integer overflow.");
             }
 
             // Mallocator wraps malloc().
-            //void * const pv = _mm_malloc(n * sizeof(T), Alignment);
             void * const pv = new (std::align_val_t(Alignment)) T[n];
 
             // Allocators should throw std::bad_alloc in the case of memory allocation failure.
-            if (pv == NULL)
-            {
+            if (pv == NULL) {
                 throw std::bad_alloc();
             }
 
@@ -118,18 +103,13 @@ class AlignedAllocator {
         }
 
         void deallocate(T * const p, const std::size_t n) const
-        {
-            //_mm_free(p);
-            delete [] p;
-        }
+        { delete [] p; }
 
 
         // The following will be the same for all allocators that ignore hints.
         template <typename U>
         T * allocate(const std::size_t n, const U * /* const hint */) const
-        {
-            return allocate(n);
-        }
+        { return allocate(n); }
 
 
         // Allocators are not required to be assignable, so
