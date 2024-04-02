@@ -94,7 +94,14 @@ public:
         if (this->size() != other.size())
             throw std::invalid_argument("SimdFuzzyChain<GOEDEL>::conjunctWith: incompatible sizes");
 
-        for (size_t i = 0; i < this->data.size(); i++) {
+        for (size_t i = 0; i < (this->size() / N_PACKED) * N_PACKED; i += N_PACKED) {
+            __m256 a = _mm256_load_ps(this->data.data() + i);
+            __m256 b = _mm256_load_ps(other.data.data() + i);
+            __m256 res = _mm256_min_ps(a, b);
+            _mm256_store_ps(this->data.data() + i, res);
+        }
+
+        for (size_t i = (data.size() / N_PACKED) * N_PACKED; i < data.size(); ++i) {
             this->data[i] = min(this->data[i], other.data[i]);
         }
     }
@@ -109,7 +116,19 @@ public:
         if (this->size() != other.size())
             throw std::invalid_argument("SimdFuzzyChain<LUKASIEWICZ>::conjunctWith: incompatible sizes");
 
-        for (size_t i = 0; i < this->data.size(); i++) {
+        __m256 zero = _mm256_set1_ps(0.0);
+        __m256 one = _mm256_set1_ps(1.0);
+
+        for (size_t i = 0; i < (this->size() / N_PACKED) * N_PACKED; i += N_PACKED) {
+            __m256 a = _mm256_load_ps(this->data.data() + i);
+            __m256 b = _mm256_load_ps(other.data.data() + i);
+            __m256 res = _mm256_add_ps(a, b);
+            res = _mm256_sub_ps(res, one);
+            res = _mm256_max_ps(res, zero);
+            _mm256_store_ps(this->data.data() + i, res);
+        }
+
+        for (size_t i = (data.size() / N_PACKED) * N_PACKED; i < data.size(); ++i) {
             this->data[i] += other.data[i] - 1.0;
             if (this->data[i] < 0.0)
                 this->data[i] = 0;
@@ -126,7 +145,14 @@ public:
         if (this->size() != other.size())
             throw std::invalid_argument("SimdFuzzyChain<GOGUEN>::conjunctWith: incompatible sizes");
 
-        for (size_t i = 0; i < this->data.size(); i++) {
+        for (size_t i = 0; i < (this->size() / N_PACKED) * N_PACKED; i += N_PACKED) {
+            __m256 a = _mm256_load_ps(this->data.data() + i);
+            __m256 b = _mm256_load_ps(other.data.data() + i);
+            __m256 res = _mm256_mul_ps(a, b);
+            _mm256_store_ps(this->data.data() + i, res);
+        }
+
+        for (size_t i = (data.size() / N_PACKED) * N_PACKED; i < data.size(); ++i) {
             this->data[i] = this->data[i] * other.data[i];
         }
     }
