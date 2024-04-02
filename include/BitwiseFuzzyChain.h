@@ -238,7 +238,6 @@ public:
 
     void conjunctWith(const BitwiseFuzzyChain<BLSIZE, TNorm::LUKASIEWICZ>& other)
     {
-        /*
         if (this->n != other.n)
             throw std::invalid_argument("BitwiseFuzzyChain<LUKASIEWICZ>::conjunctWith: incompatible sizes");
 
@@ -250,20 +249,6 @@ public:
             BASE_TYPE sum = a[i] + b[i];
             BASE_TYPE s = this->internalCloneBits(sum);
             res[i] = (sum | s) & this->negOverflowMask;
-        }
-
-        this->data = res;
-        */
-        if (this->n != other.n)
-            throw std::invalid_argument("BitwiseFuzzyChain<GOEDEL>::conjunctWith: incompatible sizes");
-
-        const BASE_TYPE* a = this->data.data();
-        const BASE_TYPE* b = other.data.data();
-        BitwiseVector res = this->data;
-
-        for (size_t i = 0; i < this->data.size() - 1; i++) {
-            BASE_TYPE s = this->internalCloneBits(a[i] - b[i]);
-            res[i] = (a[i] & s) | (b[i] & ~s);
         }
 
         this->data = res;
