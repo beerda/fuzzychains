@@ -19,4 +19,4 @@ enum TNorm {
 };
 
 template <typename TYPE>
-using AlignedVector = vector<TYPE, AlignedAllocator<TYPE, 512>>;
+using AlignedVector = vector<TYPE, AlignedAllocator<TYPE, 256>>;

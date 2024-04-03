@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include "common.h"
 
 
@@ -65,7 +67,7 @@ public:
             throw std::invalid_argument("VectorFuzzyChain<GOEDEL>::conjunctWith: incompatible sizes");
 
         for (size_t i = 0; i < this->data.size(); i++) {
-            this->data[i] = min(this->data[i], other.data[i]);
+            this->data[i] = std::min(this->data[i], other.data[i]);
         }
     }
 };
