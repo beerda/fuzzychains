@@ -165,3 +165,34 @@ TEST(GoedelBitwiseFuzzyChainTest, ConjunctWith) {
         EXPECT_TRUE(EQUAL(a.at(11*j + 10), 0.000000));
     }
 }
+
+template <unsigned int N>
+class MockFuzzyChain : public BitwiseFuzzyChain<N, GOEDEL>
+{
+public:
+    void pushBack(uintmax_t v) {
+        this->internalPushBack(v);
+    }
+
+    uintmax_t sum() const
+    { return this->internalSum(); }
+};
+
+TEST(GoedelBitwiseFuzzyChainTest, SumALot) {
+    MockFuzzyChain<4> b4;
+    MockFuzzyChain<8> b8;
+
+    size_t n = b8.STEP * b8.N_BLOCK * 2 + 1;
+    for (size_t i = 0; i < n; ++i) {
+        b4.pushBack(b4.MAX_VALUE);
+        b8.pushBack(b8.MAX_VALUE);
+    }
+
+    /*
+    cout << "step=" << b.STEP << " sum=" << b.sum() << " maxval=" << b.MAX_VALUE << " n=" << n
+         << " dblblock=" << b.DBL_BLOCK_MASK << " nblock=" << b.N_BLOCK << endl;
+         */
+
+    EXPECT_TRUE(b4.sum() == n * b4.MAX_VALUE);
+    EXPECT_TRUE(b8.sum() == n * b8.MAX_VALUE);
+}

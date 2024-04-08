@@ -17,6 +17,9 @@ public:
     // number of bits in the whole integer
     constexpr static size_t INTEGER_SIZE = 8 * sizeof(BASE_TYPE);
 
+    // number of blocks in a single integer
+    constexpr static size_t N_BLOCK = INTEGER_SIZE / BLOCK_SIZE;
+
     // maximum unsigned number to be stored in a value bits of a block
     // (the overflow bit (i.e. the hightest bit) must remain empty
     constexpr static BASE_TYPE MAX_VALUE = (((BASE_TYPE) 1) << (BLOCK_SIZE - 1)) - 1;
@@ -25,9 +28,10 @@ public:
     constexpr static BASE_TYPE BLOCK_MASK = (((BASE_TYPE) 1) << BLOCK_SIZE) - 1;
 
     // bit mask of first two blocks of bits within the integer
-    constexpr static BASE_TYPE DBL_BLOCK_MASK = (BLOCK_MASK << BLOCK_SIZE) + BLOCK_MASK;
+    constexpr static BASE_TYPE DBL_BLOCK_MASK = (BLOCK_MASK << BLOCK_SIZE) | BLOCK_MASK;
 
-    constexpr static BASE_TYPE STEP = ( ((1UL << (2 * BLOCK_SIZE)) - 1) / ((1UL << (BLOCK_SIZE - 1)) - 1) - 1) / 2;
+    // half of the maximum number of additions of MAX_VALUE before it overflows DBL_BLOCK_MASK
+    constexpr static BASE_TYPE STEP = DBL_BLOCK_MASK / MAX_VALUE / 2;
 
     static const float LOG_BASE;
 
