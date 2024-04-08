@@ -35,8 +35,6 @@ public:
     BitwiseFuzzyChainBase1()
         : data(), n(0)
     {
-        data.push_back(0); // +1 to make room for shifts in sum()
-
         overflowMask = 1 << (BLOCK_SIZE - 1);
         for (size_t j = 1; j * BLOCK_SIZE < INTEGER_SIZE; j <<= 1) {
             overflowMask = overflowMask + (overflowMask << (j * BLOCK_SIZE));
@@ -53,14 +51,11 @@ public:
     void clear()
     {
         data.clear();
-        data.push_back(0); // +1 to make room for shifts in sum()
         n = 0;
     }
 
     void reserve(size_t capacity)
-    {
-        data.reserve(1 + UNSIGNED_CEILING(capacity * BLOCK_SIZE, INTEGER_SIZE)); // +1 to make room for shifts in sum()
-    }
+    { data.reserve(UNSIGNED_CEILING(capacity * BLOCK_SIZE, INTEGER_SIZE)); }
 
     size_t size() const
     { return n; }
@@ -96,8 +91,7 @@ protected:
         size_t index = n * BLOCK_SIZE / INTEGER_SIZE;
         size_t shift = n * BLOCK_SIZE % INTEGER_SIZE;
 
-        if (index == data.size() - 1) {
-            // always need to have reserved +1 integer for shifts in sum()
+        if (index == data.size()) {
             data.push_back(0);
         }
 
@@ -202,7 +196,7 @@ public:
         const BASE_TYPE* b = other.data.data();
         BitwiseVector res = this->data;
 
-        for (size_t i = 0; i < this->data.size() - 1; i++) {
+        for (size_t i = 0; i < this->data.size(); i++) {
             BASE_TYPE s = this->internalCloneBits(a[i] - b[i]);
             res[i] = (a[i] & s) | (b[i] & ~s);
         }
@@ -233,7 +227,7 @@ public:
         const BASE_TYPE* b = other.data.data();
         BitwiseVector res = this->data;
 
-        for (size_t i = 0; i < this->data.size() - 1; i++) {
+        for (size_t i = 0; i < this->data.size(); i++) {
             BASE_TYPE sum = a[i] + b[i];
             BASE_TYPE s = this->internalCloneBits(sum);
             res[i] = (sum | s) & this->negOverflowMask;
@@ -282,7 +276,7 @@ public:
         const BASE_TYPE* b = other.data.data();
         BitwiseVector res = this->data;
         BASE_TYPE themask;
-        for (size_t i = 0; i < this->data.size() - 1; i++) {
+        for (size_t i = 0; i < this->data.size(); i++) {
             BASE_TYPE sum = (a[i] + b[i]);
             BASE_TYPE s = this->internalCloneBits(sum);
             res[i] = (sum | s) & this->negOverflowMask;

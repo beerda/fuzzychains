@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "BitwiseFuzzyChain.h"
 
-#define EXPECTED_DATA_SIZE(x) ((x-1) * BitwiseFuzzyChain<8, LUKASIEWICZ>::BLOCK_SIZE / BitwiseFuzzyChain<8, LUKASIEWICZ>::INTEGER_SIZE + 2)
+#define EXPECTED_DATA_SIZE(x) ((x-1) * BitwiseFuzzyChain<8, LUKASIEWICZ>::BLOCK_SIZE / BitwiseFuzzyChain<8, LUKASIEWICZ>::INTEGER_SIZE + 1)
 #define EQUAL(a, b) (fabs((a) - (b)) < 1e-6)
 
 
@@ -11,15 +11,14 @@ TEST(LukasiewiczBitwiseFuzzyChainTest, PushBackAndSum) {
     EXPECT_TRUE(b.empty());
     EXPECT_TRUE(b.size() == 0);
     EXPECT_TRUE(b.sum() == 0);
-    EXPECT_TRUE(b.getMutableData().size() == 1);
-    EXPECT_TRUE(b.getMutableData().back() == 0UL);
+    EXPECT_TRUE(b.getMutableData().size() == 0);
 
     b.pushBack(0.5);
     EXPECT_TRUE(!b.empty());
     EXPECT_TRUE(b.size() == 1);
     EXPECT_TRUE(EQUAL(b.at(0), 0.503937));
     EXPECT_TRUE(EQUAL(b.sum(), 0.503937));
-    EXPECT_TRUE(b.getMutableData().size() == 2);
+    EXPECT_TRUE(b.getMutableData().size() == 1);
 
     b.pushBack(0.1);
     EXPECT_TRUE(!b.empty());
@@ -119,23 +118,23 @@ TEST(LukasiewiczBitwiseFuzzyChainTest, Reserve) {
     BitwiseFuzzyChain<8, LUKASIEWICZ> b;
 
     EXPECT_TRUE(b.size() == 0);
-    EXPECT_TRUE(b.getMutableData().size() == 1);
-    EXPECT_TRUE(b.getMutableData().capacity() == 1);
+    EXPECT_TRUE(b.getMutableData().size() == 0);
+    EXPECT_TRUE(b.getMutableData().capacity() == 0);
 
     b.reserve(inBlock * 2);
     EXPECT_TRUE(b.size() == 0);
-    EXPECT_TRUE(b.getMutableData().size() == 1);
-    EXPECT_TRUE(b.getMutableData().capacity() == 3);
+    EXPECT_TRUE(b.getMutableData().size() == 0);
+    EXPECT_TRUE(b.getMutableData().capacity() == 2);
 
     b.reserve(inBlock * 5);
     EXPECT_TRUE(b.size() == 0);
-    EXPECT_TRUE(b.getMutableData().size() == 1);
-    EXPECT_TRUE(b.getMutableData().capacity() == 6);
+    EXPECT_TRUE(b.getMutableData().size() == 0);
+    EXPECT_TRUE(b.getMutableData().capacity() == 5);
 
     b.reserve(inBlock * 5 + 1);
     EXPECT_TRUE(b.size() == 0);
-    EXPECT_TRUE(b.getMutableData().size() == 1);
-    EXPECT_TRUE(b.getMutableData().capacity() == 7);
+    EXPECT_TRUE(b.getMutableData().size() == 0);
+    EXPECT_TRUE(b.getMutableData().capacity() == 6);
 }
 
 TEST(LukasiewiczBitwiseFuzzyChainTest, ConjunctWith) {
