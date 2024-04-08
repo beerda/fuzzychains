@@ -215,8 +215,6 @@ TEST(SimdFuzzyChainTest, LukasiewiczConjunctWith) {
     a.conjunctWith(b);
 
     for (int j = 0; j < 1; j++) {
-        cout << a.at(11*j + 9) << endl;
-
         EXPECT_FLOAT_EQ(a.at(11*j + 0), 0.0); // 0.0 and 1.0
         EXPECT_FLOAT_EQ(a.at(11*j + 1), 0.1); // 0.2 and 0.9
         EXPECT_FLOAT_EQ(a.at(11*j + 2), 0.2); // 0.4 and 0.8
