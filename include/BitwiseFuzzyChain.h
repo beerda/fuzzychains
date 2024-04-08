@@ -27,7 +27,7 @@ public:
     // bit mask of first two blocks of bits within the integer
     constexpr static BASE_TYPE DBL_BLOCK_MASK = (BLOCK_MASK << BLOCK_SIZE) + BLOCK_MASK;
 
-    constexpr static BASE_TYPE STEP = ((1UL << (2 * BLOCK_SIZE)) - 1) / ((1UL << (BLOCK_SIZE - 1)) - 1) - 1;
+    constexpr static BASE_TYPE STEP = ( ((1UL << (2 * BLOCK_SIZE)) - 1) / ((1UL << (BLOCK_SIZE - 1)) - 1) - 1) / 2;
 
     static const float LOG_BASE;
 
@@ -42,6 +42,12 @@ public:
             overflowMask = overflowMask + (overflowMask << (j * BLOCK_SIZE));
         }
         negOverflowMask = ~overflowMask;
+
+        oddBlockMask = BLOCK_MASK;
+        for (size_t shift = 1; shift < INTEGER_SIZE / 2; shift += BLOCK_SIZE) {
+            oddBlockMask = (oddBlockMask << (2 * BLOCK_SIZE)) + BLOCK_MASK;
+        }
+
     }
 
     void clear()
@@ -83,6 +89,7 @@ protected:
     size_t n;
     BASE_TYPE overflowMask;
     BASE_TYPE negOverflowMask;
+    BASE_TYPE oddBlockMask;
 
     void internalPushBack(BASE_TYPE value)
     {
@@ -114,38 +121,19 @@ protected:
 
     BASE_TYPE internalSum() const
     {
-        // TODO: as constant
-        BASE_TYPE mask = BLOCK_MASK;
-        for (size_t shift = 1; shift < INTEGER_SIZE / 2; shift += BLOCK_SIZE) {
-            mask = (mask << (2 * BLOCK_SIZE)) + BLOCK_MASK;
-        }
-
         BASE_TYPE result = 0;
-        BASE_TYPE tempOdd = 0;
-        BASE_TYPE tempEven = 0;
-        const BASE_TYPE* oddChain = data.data();
-        const BASE_TYPE* evenChain = (BASE_TYPE*) (((uint8_t*) data.data()) + (BLOCK_SIZE / 8));
-
         size_t index = 0;
-        while (index < data.size() - 1) {
-            tempOdd = 0;
-            tempEven = 0;
 
-            size_t border;
-            if (data.size() - 1 > index + STEP) {
-                border = index + STEP;
-            } else {
-                border = data.size() - 1;
-            }
+        while (index < data.size()) {
+            BASE_TYPE sum = 0;
+            size_t border = std::min(index + STEP, data.size());
 
-            //TODO: mozna se to zrychli, kdyz ten for cyklus rozdelim na dva (intrinsics optimalizace)
-            for (; index < border; index++) {
-                tempOdd += oddChain[index] & mask;
-                tempEven += evenChain[index] & mask;
+            for (; index < border; ++index) {
+                BASE_TYPE val = data.at(index);
+                sum += (val & oddBlockMask) + ((val >> BLOCK_SIZE) & oddBlockMask);
             }
             for (size_t shift = 0; shift < INTEGER_SIZE; shift += 2 * BLOCK_SIZE) {
-                result += (tempOdd >> shift) & DBL_BLOCK_MASK;
-                result += (tempEven >> shift) & DBL_BLOCK_MASK;
+                result += (sum >> shift) & DBL_BLOCK_MASK;
             }
         }
 
