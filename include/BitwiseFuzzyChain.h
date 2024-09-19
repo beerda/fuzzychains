@@ -207,6 +207,13 @@ public:
 
         this->data = res;
     }
+
+    void negate()
+    {
+        for (size_t i = 0; i < this->data.size(); i++) {
+            this->data[i] = ~(this->data[i]) & this->negOverflowMask;
+        }
+    }
 };
 
 
@@ -238,6 +245,13 @@ public:
         }
 
         this->data = res;
+    }
+
+    void negate()
+    {
+        for (size_t i = 0; i < this->data.size(); i++) {
+            this->data[i] = ~(this->data[i]) & this->negOverflowMask;
+        }
     }
 };
 
@@ -288,4 +302,7 @@ public:
 
         this->data = res;
     }
+
+    void negate()
+    { throw std::runtime_error("BitwiseFuzzyChain<GOGUEN>::negate() is not implemented"); }
 };

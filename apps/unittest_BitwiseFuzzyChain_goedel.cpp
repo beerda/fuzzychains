@@ -137,6 +137,28 @@ TEST(GoedelBitwiseFuzzyChainTest, Reserve) {
     EXPECT_TRUE(b.getMutableData().capacity() == 6);
 }
 
+TEST(GoedelBitwiseFuzzyChainTest, Negate) {
+    BitwiseFuzzyChain<8, GOEDEL> a;
+    BitwiseFuzzyChain<8, GOEDEL> b;
+
+    for (int j = 0; j < 100; j++) {
+        for (int i = 0; i <= 127; i++) {
+            a.pushBack(i / 127.0);
+            b.pushBack(i / 127.0);
+        }
+    }
+
+    a.negate();
+
+    int pos = 0;
+    for (int j = 0; j < 100; j++) {
+        for (int i = 0; i <= 127; i++) {
+            EXPECT_TRUE(EQUAL(a.at(pos), 1 - b.at(pos)));
+            pos++;
+        }
+    }
+}
+
 TEST(GoedelBitwiseFuzzyChainTest, ConjunctWith) {
     BitwiseFuzzyChain<8, GOEDEL> a;
     BitwiseFuzzyChain<8, GOEDEL> b;

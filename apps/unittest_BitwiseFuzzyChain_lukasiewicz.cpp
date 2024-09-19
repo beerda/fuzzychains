@@ -137,6 +137,28 @@ TEST(LukasiewiczBitwiseFuzzyChainTest, Reserve) {
     EXPECT_TRUE(b.getMutableData().capacity() == 6);
 }
 
+TEST(LukasiewiczBitwiseFuzzyChainTest, Negate) {
+    BitwiseFuzzyChain<8, LUKASIEWICZ> a;
+    BitwiseFuzzyChain<8, LUKASIEWICZ> b;
+
+    for (int j = 0; j < 100; j++) {
+        for (int i = 0; i <= 127; i++) {
+            a.pushBack(i / 127.0);
+            b.pushBack(i / 127.0);
+        }
+    }
+
+    a.negate();
+
+    int pos = 0;
+    for (int j = 0; j < 100; j++) {
+        for (int i = 0; i <= 127; i++) {
+            EXPECT_TRUE(EQUAL(a.at(pos), 1 - b.at(pos)));
+            pos++;
+        }
+    }
+}
+
 TEST(LukasiewiczBitwiseFuzzyChainTest, ConjunctWith) {
     BitwiseFuzzyChain<8, LUKASIEWICZ> a;
     BitwiseFuzzyChain<8, LUKASIEWICZ> b;
