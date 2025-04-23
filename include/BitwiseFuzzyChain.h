@@ -174,6 +174,22 @@ protected:
 };
 
 
+template <>
+class BitwiseFuzzyChainBase2<16> : public BitwiseFuzzyChainBase1<16> {
+protected:
+    inline BASE_TYPE internalCloneBits(BASE_TYPE value) const
+    {
+        BASE_TYPE res = value & overflowMask;
+        res = res | (res >> 1);
+        res = res | (res >> 2);
+        res = res | (res >> 4);
+        res = res | (res >> 8);
+
+        return res;
+    }
+};
+
+
 template <unsigned int BLSIZE, TNorm TNORM>
 class BitwiseFuzzyChain : public BitwiseFuzzyChainBase2<BLSIZE> {
 };
