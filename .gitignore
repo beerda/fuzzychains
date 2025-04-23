@@ -34,4 +34,4 @@
 
 *.user
 build/
-
+.history/
