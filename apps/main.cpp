@@ -1,6 +1,7 @@
 #include <benchmark/benchmark.h>
 #include "BitwiseFuzzyChain.h"
-#include "SimdFuzzyChain.h"
+#include "FloatSimdFuzzyChain.h"
+#include "IntegerSimdFuzzyChain.h"
 #include "VectorFuzzyChain.h"
 
 #define LENGTH 16777216  // 2^24
@@ -50,10 +51,30 @@ public:
 };
 
 template<TNorm TNORM>
-class SimdFuzzyChainFixture : public benchmark::Fixture {
+class FloatSimdFuzzyChainFixture : public benchmark::Fixture {
 public:
-    SimdFuzzyChain<TNORM> ch1;
-    SimdFuzzyChain<TNORM> ch2;
+    FloatSimdFuzzyChain<TNORM> ch1;
+    FloatSimdFuzzyChain<TNORM> ch2;
+    float result = 0.0;
+
+    void SetUp(::benchmark::State& state)
+    {
+        srand(1234);
+        for (size_t i = 0; i < LENGTH; i++) {
+            ch1.pushBack(1.0 * rand() / RAND_MAX);
+            ch2.pushBack(1.0 * rand() / RAND_MAX);
+        }
+    }
+
+    void TearDown(::benchmark::State& state)
+    { }
+};
+
+template<TNorm TNORM>
+class IntegerSimdFuzzyChainFixture : public benchmark::Fixture {
+public:
+    IntegerSimdFuzzyChain<TNORM> ch1;
+    IntegerSimdFuzzyChain<TNORM> ch2;
     float result = 0.0;
 
     void SetUp(::benchmark::State& state)
@@ -83,7 +104,14 @@ public:
         }                             \
     }
 
-#define BENCHMARK_SIMD_CONJUNCTION(name, tnorm) BENCHMARK_TEMPLATE_F(SimdFuzzyChainFixture, name, tnorm)(benchmark::State& st) \
+#define BENCHMARK_FLOAT_SIMD_CONJUNCTION(name, tnorm) BENCHMARK_TEMPLATE_F(FloatSimdFuzzyChainFixture, name, tnorm)(benchmark::State& st) \
+    {                                 \
+        for (auto _ : st) {           \
+            ch1.conjunctWith(ch2);    \
+        }                             \
+    }
+
+#define BENCHMARK_INTEGER_SIMD_CONJUNCTION(name, tnorm) BENCHMARK_TEMPLATE_F(IntegerSimdFuzzyChainFixture, name, tnorm)(benchmark::State& st) \
     {                                 \
         for (auto _ : st) {           \
             ch1.conjunctWith(ch2);    \
@@ -104,12 +132,23 @@ public:
         }                             \
     }
 
-#define BENCHMARK_SIMD_SUM(name, tnorm) BENCHMARK_TEMPLATE_F(SimdFuzzyChainFixture, name, tnorm)(benchmark::State& st) \
+#define BENCHMARK_FLOAT_SIMD_SUM(name, tnorm) BENCHMARK_TEMPLATE_F(FloatSimdFuzzyChainFixture, name, tnorm)(benchmark::State& st) \
     {                                 \
         for (auto _ : st) {           \
             result += ch1.sum();      \
         }                             \
     }
+
+#define BENCHMARK_INTEGER_SIMD_SUM(name, tnorm) BENCHMARK_TEMPLATE_F(IntegerSimdFuzzyChainFixture, name, tnorm)(benchmark::State& st) \
+    {                                 \
+        for (auto _ : st) {           \
+            result += ch1.sum();      \
+        }                             \
+    }
+
+BENCHMARK_INTEGER_SIMD_CONJUNCTION(GoguenConjunct, TNorm::GOGUEN)
+BENCHMARK_INTEGER_SIMD_CONJUNCTION(LukasiewiczConjunct, TNorm::LUKASIEWICZ)
+BENCHMARK_INTEGER_SIMD_CONJUNCTION(GoedelConjunct, TNorm::GOEDEL)
 
 BENCHMARK_BITWISE_CONJUNCTION(GoguenConjunct4, 4, TNorm::GOGUEN)
 BENCHMARK_BITWISE_CONJUNCTION(LukasiewiczConjunct4, 4, TNorm::LUKASIEWICZ)
@@ -127,9 +166,9 @@ BENCHMARK_VECTOR_CONJUNCTION(GoguenConjunct, TNorm::GOGUEN)
 BENCHMARK_VECTOR_CONJUNCTION(LukasiewiczConjunct, TNorm::LUKASIEWICZ)
 BENCHMARK_VECTOR_CONJUNCTION(GoedelConjunct, TNorm::GOEDEL)
 
-BENCHMARK_SIMD_CONJUNCTION(GoguenConjunct, TNorm::GOGUEN)
-BENCHMARK_SIMD_CONJUNCTION(LukasiewiczConjunct, TNorm::LUKASIEWICZ)
-BENCHMARK_SIMD_CONJUNCTION(GoedelConjunct, TNorm::GOEDEL)
+BENCHMARK_FLOAT_SIMD_CONJUNCTION(GoguenConjunct, TNorm::GOGUEN)
+BENCHMARK_FLOAT_SIMD_CONJUNCTION(LukasiewiczConjunct, TNorm::LUKASIEWICZ)
+BENCHMARK_FLOAT_SIMD_CONJUNCTION(GoedelConjunct, TNorm::GOEDEL)
 
 BENCHMARK_BITWISE_SUM(GoguenSum4, 4, TNorm::GOGUEN)
 BENCHMARK_BITWISE_SUM(LukasiewiczSum4, 4, TNorm::LUKASIEWICZ)
@@ -147,8 +186,12 @@ BENCHMARK_VECTOR_SUM(GoguenSum, TNorm::GOGUEN)
 BENCHMARK_VECTOR_SUM(LukasiewiczSum, TNorm::LUKASIEWICZ)
 BENCHMARK_VECTOR_SUM(GoedelSum, TNorm::GOEDEL)
 
-BENCHMARK_SIMD_SUM(GoguenSum, TNorm::GOGUEN)
-BENCHMARK_SIMD_SUM(LukasiewiczSum, TNorm::LUKASIEWICZ)
-BENCHMARK_SIMD_SUM(GoedelSum, TNorm::GOEDEL)
+BENCHMARK_FLOAT_SIMD_SUM(GoguenSum, TNorm::GOGUEN)
+BENCHMARK_FLOAT_SIMD_SUM(LukasiewiczSum, TNorm::LUKASIEWICZ)
+BENCHMARK_FLOAT_SIMD_SUM(GoedelSum, TNorm::GOEDEL)
+
+BENCHMARK_INTEGER_SIMD_SUM(GoguenSum, TNorm::GOGUEN)
+BENCHMARK_INTEGER_SIMD_SUM(LukasiewiczSum, TNorm::LUKASIEWICZ)
+BENCHMARK_INTEGER_SIMD_SUM(GoedelSum, TNorm::GOEDEL)
 
 BENCHMARK_MAIN();

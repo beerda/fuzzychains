@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "SimdFuzzyChain.h"
+#include "FloatSimdFuzzyChain.h"
 
 
-TEST(SimdFuzzyChainTest, LargeSum) {
-    SimdFuzzyChain<GOEDEL> b1;
+TEST(FloatSimdFuzzyChainTest, LargeSum) {
+    FloatSimdFuzzyChain<GOEDEL> b1;
 
     EXPECT_TRUE(b1.empty());
     EXPECT_TRUE(b1.size() == 0);
@@ -19,9 +19,9 @@ TEST(SimdFuzzyChainTest, LargeSum) {
     }
 }
 
-TEST(SimdFuzzyChainTest, Goedel) {
-    SimdFuzzyChain<GOEDEL> b1;
-    SimdFuzzyChain<GOEDEL> b2;
+TEST(FloatSimdFuzzyChainTest, Goedel) {
+    FloatSimdFuzzyChain<GOEDEL> b1;
+    FloatSimdFuzzyChain<GOEDEL> b2;
 
     EXPECT_TRUE(b1.empty());
     EXPECT_TRUE(b1.size() == 0);
@@ -55,9 +55,9 @@ TEST(SimdFuzzyChainTest, Goedel) {
     EXPECT_FLOAT_EQ(b1.sum(), 0.6 + 0.1 + 0 + 0.3);
 }
 
-TEST(SimdFuzzyChainTest, GoedelConjunctWith) {
-    SimdFuzzyChain<GOEDEL> a;
-    SimdFuzzyChain<GOEDEL> b;
+TEST(FloatSimdFuzzyChainTest, GoedelConjunctWith) {
+    FloatSimdFuzzyChain<GOEDEL> a;
+    FloatSimdFuzzyChain<GOEDEL> b;
 
     for (int j = 0; j < 100; j++) {
         for (double i = 0.0; i <= 1.0; i += 0.1)
@@ -87,9 +87,9 @@ TEST(SimdFuzzyChainTest, GoedelConjunctWith) {
     }
 }
 
-TEST(SimdFuzzyChainTest, Goguen) {
-    SimdFuzzyChain<GOGUEN> b1;
-    SimdFuzzyChain<GOGUEN> b2;
+TEST(FloatSimdFuzzyChainTest, Goguen) {
+    FloatSimdFuzzyChain<GOGUEN> b1;
+    FloatSimdFuzzyChain<GOGUEN> b2;
 
     EXPECT_TRUE(b1.empty());
     EXPECT_TRUE(b1.size() == 0);
@@ -123,9 +123,9 @@ TEST(SimdFuzzyChainTest, Goguen) {
     EXPECT_FLOAT_EQ(b1.sum(), 0.8 * 0.6 + 0.1 * 0.6 + 0 + 0.3);
 }
 
-TEST(SimdFuzzyChainTest, GoguenConjunctWith) {
-    SimdFuzzyChain<GOGUEN> a;
-    SimdFuzzyChain<GOGUEN> b;
+TEST(FloatSimdFuzzyChainTest, GoguenConjunctWith) {
+    FloatSimdFuzzyChain<GOGUEN> a;
+    FloatSimdFuzzyChain<GOGUEN> b;
 
     for (int j = 0; j < 1; j++) {
         for (double i = 0.0; i <= 1.0; i += 0.2)
@@ -158,9 +158,9 @@ TEST(SimdFuzzyChainTest, GoguenConjunctWith) {
     }
 }
 
-TEST(SimdFuzzyChainTest, Lukasiewicz) {
-    SimdFuzzyChain<LUKASIEWICZ> b1;
-    SimdFuzzyChain<LUKASIEWICZ> b2;
+TEST(FloatSimdFuzzyChainTest, Lukasiewicz) {
+    FloatSimdFuzzyChain<LUKASIEWICZ> b1;
+    FloatSimdFuzzyChain<LUKASIEWICZ> b2;
 
     EXPECT_TRUE(b1.empty());
     EXPECT_TRUE(b1.size() == 0);
@@ -194,9 +194,9 @@ TEST(SimdFuzzyChainTest, Lukasiewicz) {
     EXPECT_FLOAT_EQ(b1.sum(), 0.4 + 0.0 + 0 + 0.3);
 }
 
-TEST(SimdFuzzyChainTest, LukasiewiczConjunctWith) {
-    SimdFuzzyChain<LUKASIEWICZ> a;
-    SimdFuzzyChain<LUKASIEWICZ> b;
+TEST(FloatSimdFuzzyChainTest, LukasiewiczConjunctWith) {
+    FloatSimdFuzzyChain<LUKASIEWICZ> a;
+    FloatSimdFuzzyChain<LUKASIEWICZ> b;
 
     for (int j = 0; j < 1; j++) {
         for (double i = 0.0; i <= 1.0; i += 0.2)

@@ -5,12 +5,12 @@
 
 
 template <TNorm TNORM>
-class SimdFuzzyChainBase {
+class FloatSimdFuzzyChainBase {
 public:
     // number of floats that fit into the SIMD register
     constexpr static size_t N_PACKED = 8;
 
-    SimdFuzzyChainBase()
+    FloatSimdFuzzyChainBase()
         : data()
     { }
 
@@ -68,12 +68,12 @@ public:
         return res;
     }
 
-    void conjunctWith(const SimdFuzzyChainBase& other);
+    void conjunctWith(const FloatSimdFuzzyChainBase& other);
 
-    bool operator == (const SimdFuzzyChainBase& other) const
+    bool operator == (const FloatSimdFuzzyChainBase& other) const
     { return data == other.data; }
 
-    bool operator != (const SimdFuzzyChainBase& other) const
+    bool operator != (const FloatSimdFuzzyChainBase& other) const
     { return !(*this == other); }
 
 protected:
@@ -82,22 +82,28 @@ protected:
 
 
 template <TNorm TNORM>
-class SimdFuzzyChain : public SimdFuzzyChainBase<TNORM> {
+class FloatSimdFuzzyChain : public FloatSimdFuzzyChainBase<TNORM> {
 };
 
 
 template <>
-class SimdFuzzyChain<TNorm::GOEDEL> : public SimdFuzzyChainBase<TNorm::GOEDEL> {
+class FloatSimdFuzzyChain<TNorm::GOEDEL> : public FloatSimdFuzzyChainBase<TNorm::GOEDEL> {
 public:
-    void conjunctWith(const SimdFuzzyChain<TNorm::GOEDEL>& other)
+    void conjunctWith(const FloatSimdFuzzyChain<TNorm::GOEDEL>& other)
     {
         if (this->size() != other.size())
-            throw std::invalid_argument("SimdFuzzyChain<GOEDEL>::conjunctWith: incompatible sizes");
+            throw std::invalid_argument("FloatSimdFuzzyChain<GOEDEL>::conjunctWith: incompatible sizes");
 
         for (size_t i = 0; i < (this->size() / N_PACKED) * N_PACKED; i += N_PACKED) {
             __m256 a = _mm256_load_ps(this->data.data() + i);
             __m256 b = _mm256_load_ps(other.data.data() + i);
             __m256 res = _mm256_min_ps(a, b);
+            _mm256_store_ps(this->data.data() + i, res);
+            
+            i += N_PACKED;
+            a = _mm256_load_ps(this->data.data() + i);
+            b = _mm256_load_ps(other.data.data() + i);
+            res = _mm256_min_ps(a, b);
             _mm256_store_ps(this->data.data() + i, res);
         }
 
@@ -109,12 +115,12 @@ public:
 
 
 template <>
-class SimdFuzzyChain<TNorm::LUKASIEWICZ> : public SimdFuzzyChainBase<TNorm::LUKASIEWICZ> {
+class FloatSimdFuzzyChain<TNorm::LUKASIEWICZ> : public FloatSimdFuzzyChainBase<TNorm::LUKASIEWICZ> {
 public:
-    void conjunctWith(const SimdFuzzyChain<TNorm::LUKASIEWICZ>& other)
+    void conjunctWith(const FloatSimdFuzzyChain<TNorm::LUKASIEWICZ>& other)
     {
         if (this->size() != other.size())
-            throw std::invalid_argument("SimdFuzzyChain<LUKASIEWICZ>::conjunctWith: incompatible sizes");
+            throw std::invalid_argument("FloatSimdFuzzyChain<LUKASIEWICZ>::conjunctWith: incompatible sizes");
 
         __m256 zero = _mm256_set1_ps(0.0);
         __m256 one = _mm256_set1_ps(1.0);
@@ -138,17 +144,23 @@ public:
 
 
 template <>
-class SimdFuzzyChain<TNorm::GOGUEN> : public SimdFuzzyChainBase<TNorm::GOGUEN> {
+class FloatSimdFuzzyChain<TNorm::GOGUEN> : public FloatSimdFuzzyChainBase<TNorm::GOGUEN> {
 public:
-    void conjunctWith(const SimdFuzzyChain<TNorm::GOGUEN>& other)
+    void conjunctWith(const FloatSimdFuzzyChain<TNorm::GOGUEN>& other)
     {
         if (this->size() != other.size())
-            throw std::invalid_argument("SimdFuzzyChain<GOGUEN>::conjunctWith: incompatible sizes");
+            throw std::invalid_argument("FloatSimdFuzzyChain<GOGUEN>::conjunctWith: incompatible sizes");
 
         for (size_t i = 0; i < (this->size() / N_PACKED) * N_PACKED; i += N_PACKED) {
             __m256 a = _mm256_load_ps(this->data.data() + i);
             __m256 b = _mm256_load_ps(other.data.data() + i);
             __m256 res = _mm256_mul_ps(a, b);
+            _mm256_store_ps(this->data.data() + i, res);
+
+            i += N_PACKED;
+            a = _mm256_load_ps(this->data.data() + i);
+            b = _mm256_load_ps(other.data.data() + i);
+            res = _mm256_mul_ps(a, b);
             _mm256_store_ps(this->data.data() + i, res);
         }
 
